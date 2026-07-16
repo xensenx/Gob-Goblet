@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- SEO -->
+  <title>Goblet — Secure File Encryption</title>
+  <meta name="description" content="Goblet encrypts your files in the browser using AES-256-GCM. Drag, drop, password-protect, and download a .gob container. No file ever leaves your device unencrypted." />
+  <meta name="theme-color" content="#0b0f1a" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Goblet — Secure File Encryption" />
+  <meta property="og:description" content="Encrypt any file in your browser. AES-256-GCM + PBKDF2. Privacy-first." />
+  <meta property="og:type" content="website" />
+
+  <!-- Favicon emoji fallback -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏺</text></svg>" />
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/style.css" />
+
+  <!-- Preconnect for Google Fonts (already in CSS @import, just helps perf) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+</head>
+<body>
+
+  <!-- ── Header ──────────────────────────────────────────────────────────── -->
+  <header class="site-header" role="banner">
+    <div class="logo-wrap">
+      <div class="logo-icon" aria-hidden="true">🏺</div>
+      <h1 class="logo-text">Goblet</h1>
+    </div>
+    <p class="tagline">
+      <em>I Goblet it</em> &mdash; <em>I Goblet it back.</em>
+      &nbsp; AES-256-GCM encryption, right in your browser.
+    </p>
+  </header>
+
+  <!-- ── Main ────────────────────────────────────────────────────────────── -->
+  <main class="main-content" id="main-content">
+
+    <!-- ── Crypto unsupported warning (hidden by default) ────────────────── -->
+    <div id="crypto-warning" class="crypto-warning hidden" role="alert" aria-live="assertive">
+      <h2>⚠️ Browser Not Supported</h2>
+      <p>
+        Goblet requires the <strong>Web Cryptography API</strong> which your browser does not support.<br />
+        Please use a modern browser: Chrome 37+, Firefox 34+, Safari 11+, or Edge 14+.
+      </p>
+    </div>
+
+    <!-- ── Main card ──────────────────────────────────────────────────────── -->
+    <div id="main-card" class="card">
+
+      <!-- Drop zone -->
+      <div
+        id="drop-zone"
+        class="drop-zone"
+        role="region"
+        aria-label="File drop area. Drag and drop a file here, or click the button below to select a file."
+        tabindex="0"
+        aria-describedby="drop-sub-text"
+      >
+        <span class="drop-icon" aria-hidden="true">🏺</span>
+        <p class="drop-title">Drop your file here</p>
+        <p class="drop-sub" id="drop-sub-text">
+          Plain file → <strong>encrypt</strong> &nbsp;|&nbsp; <code>.gob</code> file → <strong>decrypt</strong>
+        </p>
+
+        <!-- Hidden native file input -->
+        <input
+          type="file"
+          id="file-input"
+          class="hidden"
+          aria-label="Select a file to encrypt or decrypt"
+        />
+
+        <button
+          id="file-select-btn"
+          class="file-select-btn"
+          type="button"
+          aria-label="Browse to select a file"
+        >
+          📂 Browse file
+        </button>
+      </div>
+
+      <!-- File metadata (shown after selection) -->
+      <div id="file-meta" class="file-meta hidden" role="status" aria-live="polite">
+        <span class="file-meta-icon" aria-hidden="true">📄</span>
+        <div class="file-meta-info">
+          <div class="file-meta-name" id="file-name" title="">—</div>
+          <div class="file-meta-size" id="file-size">—</div>
+        </div>
+      </div>
+
+      <!-- Mode section (shown after mode determined) -->
+      <div id="mode-section" class="mode-section hidden" aria-live="polite">
+        <span id="mode-badge" class="mode-badge" role="status"></span>
+      </div>
+
+      <!-- .gob metadata card (shown in decrypt mode) -->
+      <div id="gob-meta-card" class="gob-meta-card hidden" aria-label="Goblet container details">
+        <div class="gob-meta-title">📦 Goblet Container Info</div>
+        <div class="gob-meta-row">
+          <span class="gob-meta-label">Original</span>
+          <span class="gob-meta-value" id="gob-orig-name">—</span>
+        </div>
+        <div class="gob-meta-row">
+          <span class="gob-meta-label">Encrypted</span>
+          <span class="gob-meta-value" id="gob-timestamp">—</span>
+        </div>
+      </div>
+
+      <!-- Divider -->
+      <div class="divider" aria-hidden="true"></div>
+
+      <!-- Password section -->
+      <div id="password-section" class="password-section hidden">
+        <label class="password-label" for="password-input">Password</label>
+        <div class="password-field">
+          <input
+            type="password"
+            id="password-input"
+            class="password-input"
+            placeholder="Enter a strong password to protect this file"
+            autocomplete="off"
+            spellcheck="false"
+            aria-label="Password"
+            aria-describedby="password-warn-text"
+          />
+          <button
+            id="password-toggle"
+            class="password-toggle"
+            type="button"
+            aria-label="Show password"
+            title="Toggle password visibility"
+          >👁</button>
+        </div>
+        <p id="password-warn" class="password-warn" id="password-warn-text" role="alert">
+          ⚠️ Empty password — your file will be weakly protected.
+        </p>
+      </div>
+
+      <!-- Action button -->
+      <button
+        id="action-btn"
+        class="action-btn hidden"
+        type="button"
+        aria-label="Encrypt or decrypt the selected file"
+      >
+        🔒 Encrypt &amp; Download
+      </button>
+
+      <!-- Reset button -->
+      <button
+        id="reset-btn"
+        class="reset-btn hidden"
+        type="button"
+        aria-label="Start over with a different file"
+      >
+        ↺ Start over
+      </button>
+
+      <!-- Status bar -->
+      <div id="status-bar" class="status-bar status-idle" role="status" aria-live="polite" aria-atomic="true">
+        <div id="progress-ring" class="spinner" style="display:none" aria-hidden="true"></div>
+        <span id="status-text">Drop a file here or click to select</span>
+      </div>
+
+    </div><!-- /.card -->
+
+    <!-- ── Info pills ──────────────────────────────────────────────────────── -->
+    <div class="info-strip" aria-label="Security information">
+      <span class="info-pill"><span aria-hidden="true">🔐</span> AES-256-GCM</span>
+      <span class="info-pill"><span aria-hidden="true">🔑</span> PBKDF2-HMAC-SHA256</span>
+      <span class="info-pill"><span aria-hidden="true">🧅</span> Server-side pepper</span>
+      <span class="info-pill"><span aria-hidden="true">📦</span> .gob v1 format</span>
+      <span class="info-pill"><span aria-hidden="true">🚫</span> Max 25 MB</span>
+    </div>
+
+  </main><!-- /main -->
+
+  <!-- ── Footer ───────────────────────────────────────────────────────────── -->
+  <footer class="site-footer" role="contentinfo">
+    <p>
+      Goblet v1 &mdash; files are encrypted <strong>entirely in your browser</strong>.
+      No file content ever leaves your device unencrypted.
+      &nbsp;|&nbsp;
+      <a href="https://github.com/" target="_blank" rel="noopener noreferrer">Source</a>
+    </p>
+  </footer>
+
+  <!-- ── Scripts ──────────────────────────────────────────────────────────── -->
+  <!-- ES modules: app.js imports config, container, crypto automatically -->
+  <script type="module" src="js/app.js"></script>
+
+  <!-- No-JS fallback -->
+  <noscript>
+    <style>
+      #main-card { display: none !important; }
+    </style>
+    <div style="
+      position: fixed; inset: 0; background: #0b0f1a;
+      display: flex; align-items: center; justify-content: center;
+      font-family: sans-serif; color: #9ca3af; text-align: center; padding: 32px;
+    ">
+      <div>
+        <p style="font-size: 2rem; margin-bottom: 12px;">🏺</p>
+        <h2 style="color: #f3f4f6; margin-bottom: 8px;">JavaScript Required</h2>
+        <p>Goblet needs JavaScript enabled to perform cryptography in your browser.</p>
+      </div>
+    </div>
+  </noscript>
+
+</body>
+</html>
