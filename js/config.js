@@ -22,7 +22,7 @@ const config = {
    * PBKDF2 iteration count (must match the Worker's value).
    * This is stored in the .gob container for informational purposes.
    */
-  KDF_ITERATIONS: 200_000,
+  KDF_ITERATIONS: 100_000,
 
   /**
    * Salt length in bytes (16 bytes = 128 bits).
