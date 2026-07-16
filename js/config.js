@@ -11,7 +11,7 @@ const config = {
    * Update this to your deployed worker URL for production.
    * @example 'https://goblet-worker.yourname.workers.dev'
    */
-  WORKER_URL: 'goblet-engine.xsen1947.workers.dev',
+  WORKER_URL: 'https://goblet-engine.xsen1947.workers.dev',
 
   /**
    * Maximum file size allowed for encryption (25 MB).
